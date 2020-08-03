@@ -1,9 +1,7 @@
 const express = require("express");
 const router = new express.Router();
 const Message = require("../models/message");
-const jwt = require("jsonwebtoken");
-const { SECRET_KEY } = require("../config");
-const { authenticateJWT, ensureCorrectUser, ensureLoggedIn } = require("../middleware/auth");
+const { ensureLoggedIn } = require("../middleware/auth");
 
 /** GET /:id - get detail of message.
  *
@@ -17,9 +15,15 @@ const { authenticateJWT, ensureCorrectUser, ensureLoggedIn } = require("../middl
  * Make sure that the currently-logged-in users is either the to or from user.
  *
  **/
-router.get("/:id", async (req, res, next) => {
+router.get("/:id", ensureLoggedIn, async (req, res, next) => {
 	try {
 		const message = await Message.get(req.params.id);
+
+		let username = req.user.username;
+		if (message.to_user.username !== username && message.from_user.username !== username) {
+			throw new ExpressError("Cannot read this message", 401);
+		}
+
 		return res.json({ message });
 	} catch (e) {
 		return next(e);
@@ -53,6 +57,13 @@ router.post("/", ensureLoggedIn, async (req, res, next) => {
  **/
 router.post("/:id/read", async (req, res, next) => {
 	try {
+		let username = req.user.username;
+		let message = await Message.get(req.params.id);
+
+		if (message.to_user.username !== username) {
+			throw new ExpressError("Cannot set this message to read", 401);
+		}
+
 		const message = await Message.markRead(req.params.id);
 		return res.json({ message });
 	} catch (e) {
