@@ -12,7 +12,7 @@ const { SECRET_KEY } = require("../config");
  **/
 router.post("/login", async (req, res, next) => {
 	try {
-		const { username, password } = req.body.login;
+		const { username, password } = req.body;
 		if (!username || !password) {
 			throw new ExpressError("username and password required", 400);
 		}
@@ -20,7 +20,7 @@ router.post("/login", async (req, res, next) => {
 		if (bool) {
 			User.updateLoginTimestamp(username);
 			const token = jwt.sign({ username }, SECRET_KEY);
-			return res.json(token);
+			return res.json({ token });
 		}
 		throw new ExpressError("invalid username/password", 400);
 	} catch (e) {
@@ -39,7 +39,7 @@ router.post("/register", async (req, res, next) => {
 		let { username } = await User.register(req.body);
 
 		const token = jwt.sign({ username }, SECRET_KEY);
-		return res.json(token);
+		return res.json({ token });
 	} catch (e) {
 		return next(e);
 	}
