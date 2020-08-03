@@ -1,6 +1,5 @@
 const express = require("express");
 const router = new express.Router();
-const ExpressError = require("../expressError");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../config");
@@ -71,3 +70,5 @@ router.get("/:username/from", async (req, res, next) => {
 		return next(e);
 	}
 });
+
+module.exports = router;
