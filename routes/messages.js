@@ -64,7 +64,7 @@ router.post("/:id/read", async (req, res, next) => {
 			throw new ExpressError("Cannot set this message to read", 401);
 		}
 
-		const message = await Message.markRead(req.params.id);
+		message = await Message.markRead(req.params.id);
 		return res.json({ message });
 	} catch (e) {
 		return next(e);
